@@ -24,6 +24,9 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
+          # Re-tagging a version (e.g. to re-run installers) shouldn't fail on an
+          # already-published file.
+          skip-existing: true
 
   installers:
     name: ${{ matrix.briefcase-platform }} installer
