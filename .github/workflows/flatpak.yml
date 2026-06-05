@@ -29,10 +29,13 @@ jobs:
           curl -fL -o fpg.py https://raw.githubusercontent.com/flatpak/flatpak-builder-tools/master/pip/flatpak-pip-generator.py
           # Binary-wheel packages must use platform wheels (no usable sdist build);
           # pygobject/pycairo stay as sdists built against the runtime. Both arches.
+          # lxml/pygobject/pycairo ship in the GNOME runtime (read-only), so don't vendor
+          # them — pip uses the runtime copies at build time.
           python3 fpg.py \
             --runtime=org.gnome.Sdk//47 \
             --requirements-file=requirements.txt \
-            --prefer-wheels=numpy,opencv-python-headless,pillow,lxml,pikepdf,pypdfium2 \
+            --prefer-wheels=numpy,opencv-python-headless,pillow,pikepdf,pypdfium2 \
+            --ignore-installed=lxml,pygobject,pycairo \
             --output=python3-deps
           rm -f fpg.py
           echo "=== generated python3-deps.json (first module) ==="
