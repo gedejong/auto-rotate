@@ -1,0 +1,157 @@
+[project]
+name = "auto-rotate"
+version = "0.1.0"
+description = "Automatically deskew and turn upright every page of a PDF (jdeskew + Tesseract OSD)."
+readme = "README.md"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Edwin de Jong", email = "edejong@fastmail.fm" }
+]
+requires-python = ">=3.11"
+keywords = ["pdf", "deskew", "scan", "ocr", "tesseract", "rotate", "binarize", "sheet-music"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Environment :: MacOS X",
+    "Environment :: Win32 (MS Windows)",
+    "Environment :: X11 Applications",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Graphics :: Graphics Conversion",
+    "Topic :: Scientific/Engineering :: Image Processing",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "img2pdf>=0.6.3",
+    "jdeskew>=0.3.0",
+    "numpy>=2.0",
+    "opencv-python-headless>=4.9",
+    "pillow>=10",
+    "pypdfium2>=5",
+    "pytesseract>=0.3.13",
+]
+
+[project.optional-dependencies]
+# Adds a searchable text layer via the `--ocr` flag. Provides the `ocrmypdf`
+# CLI on PATH; it (and the system `tesseract` binary) is invoked as a subprocess.
+ocr = ["ocrmypdf>=15"]
+# The desktop GUI (Toga). Kept optional so CLI/library installs stay lean.
+gui = ["toga>=0.5"]
+
+[project.scripts]
+auto-rotate = "auto_rotate.cli:main"
+
+[project.gui-scripts]
+# gui-script (not console) so Windows launches it without a terminal window.
+auto-rotate-gui = "auto_rotate.gui.app:run"
+
+[project.urls]
+Homepage = "https://github.com/gedejong/auto-rotate"
+Repository = "https://github.com/gedejong/auto-rotate"
+Issues = "https://github.com/gedejong/auto-rotate/issues"
+Changelog = "https://github.com/gedejong/auto-rotate/blob/main/CHANGELOG.md"
+
+[build-system]
+requires = ["uv_build>=0.11.8,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.409",
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.15.15",
+]
+
+[tool.ruff]
+src = ["src", "tests"]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "C4", "RUF"]
+
+[tool.pyright]
+include = ["src", "tests"]
+pythonVersion = "3.11"
+typeCheckingMode = "strict"
+venvPath = "."
+venv = ".venv"
+# Third-party libs without type stubs (cv2, pypdfium2, img2pdf, pytesseract, jdeskew).
+reportMissingTypeStubs = false
+reportUnknownMemberType = false
+reportUnknownVariableType = false
+reportUnknownArgumentType = false
+# Noisy for monkeypatch stub lambdas in tests; src has no lambdas.
+reportUnknownLambdaType = false
+# Toga re-exports layout constants (COLUMN/ROW) that aren't listed in __all__.
+reportPrivateImportUsage = false
+
+[tool.pytest.ini_options]
+# `integration` tests drive the real ocrmypdf/tesseract binaries end-to-end and are
+# deselected by default; run them with `uv run pytest -m integration`.
+addopts = "--cov=auto_rotate --cov-report=term-missing --cov-fail-under=85 -m 'not integration'"
+testpaths = ["tests"]
+markers = ["integration: end-to-end tests that invoke real system binaries"]
+
+[tool.coverage.run]
+branch = true
+source = ["auto_rotate"]
+# Toga widget wiring and the GUI launch entry point are exercised by launching the app,
+# not unit tests; the GUI's testable logic lives in gui/controller.py and is covered.
+omit = ["*/gui/app.py", "*/auto_rotate/__main__.py"]
+
+# --- Briefcase (BeeWare): native installers for Windows/macOS/Linux ---------
+# uv_build produces the wheel/sdist for PyPI; Briefcase reads this same config to
+# freeze the app into MSI / DMG / .deb / .rpm / Flatpak installers.
+[tool.briefcase]
+project_name = "Auto-Rotate"
+bundle = "dev.gedejong"
+version = "0.1.0"
+url = "https://github.com/gedejong/auto-rotate"
+author = "Edwin de Jong"
+author_email = "edejong@fastmail.fm"
+
+[tool.briefcase.app.auto-rotate]
+formal_name = "Auto-Rotate"
+description = "Deskew and turn upright every page of a PDF."
+long_description = """Auto-Rotate rasterizes a PDF, snaps each page to its correct
+orientation, corrects fine skew, and can binarize scans to crisp black-on-white."""
+icon = "src/auto_rotate/gui/resources/autorotate"
+sources = ["src/auto_rotate"]
+test_sources = ["tests"]
+requires = [
+    "img2pdf>=0.6.3",
+    "jdeskew>=0.3.0",
+    "numpy>=2.0",
+    "opencv-python-headless>=4.9",
+    "pillow>=10",
+    "pypdfium2>=5",
+    "pytesseract>=0.3.13",
+    "toga>=0.5",
+]
+test_requires = ["pytest"]
+
+[tool.briefcase.app.auto-rotate.macOS]
+# Single-arch build: not every native dep (opencv, numpy, pikepdf via img2pdf) ships a
+# universal2 wheel, so a universal build can't resolve. Builds for the host arch
+# (Apple Silicon on current runners); add an Intel runner later if x86_64 is needed.
+universal_build = false
+# pikepdf (via img2pdf) only ships arm64 wheels for macOS 14+, so raise the deployment
+# target to match (Briefcase defaults to 11.0).
+min_os_version = "14.0"
+# std-nslog routes stdout/stderr to the macOS unified log (visible in Console.app).
+requires = ["toga-cocoa>=0.5", "std-nslog>=1.0.3"]
+
+[tool.briefcase.app.auto-rotate.windows]
+requires = ["toga-winforms>=0.5"]
+
+[tool.briefcase.app.auto-rotate.linux]
+requires = ["toga-gtk>=0.5"]
+# System packages the Linux backend needs at runtime (named per distro by Briefcase).
+system_requires = ["libgirepository1.0-dev", "libcairo2-dev", "gir1.2-gtk-3.0"]
+

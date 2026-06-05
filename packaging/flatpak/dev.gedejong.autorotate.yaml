@@ -1,0 +1,22 @@
+# Flathub manifest stub. Briefcase can also emit a Flatpak directly
+# (`briefcase package linux flatpak`); this manifest is for a Flathub submission, which
+# requires a tagged release to build from. Pin `tag`/`commit` before submitting.
+app-id: dev.gedejong.autorotate
+runtime: org.gnome.Platform
+runtime-version: "46"
+sdk: org.gnome.Sdk
+command: auto-rotate-gui
+finish-args:
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --filesystem=home
+modules:
+  - name: auto-rotate
+    buildsystem: simple
+    build-commands:
+      - pip3 install --prefix=/app .
+    sources:
+      - type: git
+        url: https://github.com/gedejong/auto-rotate.git
+        tag: v0.1.0

@@ -1,0 +1,82 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write # create the GitHub Release and upload assets
+  id-token: write # PyPI Trusted Publishing (OIDC) — no API token needed
+
+jobs:
+  pypi:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - name: Build sdist + wheel
+        run: uv build
+      - name: Publish (Trusted Publishing)
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+
+  installers:
+    name: ${{ matrix.briefcase-platform }} installer
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-latest, briefcase-platform: windows }
+          - { os: macos-latest, briefcase-platform: macOS }
+          - { os: ubuntu-latest, briefcase-platform: linux }
+    runs-on: ${{ matrix.os }}
+    # Map signing secrets to env vars; `if:` can test env but not the secrets context.
+    env:
+      MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+
+      # macOS: sign + notarize when an Apple Developer identity is configured,
+      # otherwise ad-hoc sign so the .dmg still builds (Gatekeeper warns on first open).
+      - name: Package (macOS, signed)
+        if: matrix.briefcase-platform == 'macOS' && env.MACOS_SIGNING_IDENTITY != ''
+        run: |
+          uvx briefcase create macOS
+          uvx briefcase build macOS
+          uvx briefcase package macOS --identity "$MACOS_SIGNING_IDENTITY"
+      - name: Package (macOS, ad-hoc)
+        if: matrix.briefcase-platform == 'macOS' && env.MACOS_SIGNING_IDENTITY == ''
+        run: |
+          uvx briefcase create macOS
+          uvx briefcase build macOS
+          uvx briefcase package macOS --adhoc-sign
+
+      # Windows: code-sign via the WiX/signtool identity when a cert is configured.
+      - name: Package (Windows)
+        if: matrix.briefcase-platform == 'windows'
+        run: |
+          uvx briefcase create windows
+          uvx briefcase build windows
+          uvx briefcase package windows
+
+      # Linux: Briefcase uses Docker on the runner to build a .deb for the system backend.
+      - name: Package (Linux)
+        if: matrix.briefcase-platform == 'linux'
+        run: |
+          uvx briefcase create linux
+          uvx briefcase build linux
+          uvx briefcase package linux
+
+      - name: Attach installers to the release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          fail_on_unmatched_files: true
