@@ -13,14 +13,11 @@ on:
 
 jobs:
   flatpak:
-    name: Build (${{ matrix.arch }})
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - { runner: ubuntu-latest, arch: x86_64 }
-          - { runner: ubuntu-24.04-arm, arch: aarch64 }
-    runs-on: ${{ matrix.runner }}
+    name: Build (x86_64)
+    # x86_64 only: the flathub-infra container is amd64, so aarch64 can't build here.
+    # The committed python3-deps.json carries both arches' wheels, so Flathub's own
+    # aarch64 buildbot builds that arch at submission time.
+    runs-on: ubuntu-latest
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-47
       options: --privileged
@@ -46,10 +43,8 @@ jobs:
           echo "=== generated python3-deps.json (first module) ==="
           head -n 30 python3-deps.json
 
-      # The generated set is identical across arches (it carries both arches' wheel
-      # sources), so upload it once for committing into the Flathub repo.
+      # Upload the generated set (both arches' wheels) for committing to the Flathub repo.
       - name: Upload generated deps
-        if: matrix.arch == 'x86_64'
         uses: actions/upload-artifact@v4
         with:
           name: python3-deps
@@ -57,7 +52,7 @@ jobs:
 
       - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
-          bundle: auto-rotate-${{ matrix.arch }}.flatpak
+          bundle: auto-rotate-x86_64.flatpak
           manifest-path: packaging/flatpak/io.github.gedejong.auto_rotate.yaml
-          cache-key: flatpak-builder-${{ matrix.arch }}-${{ github.sha }}
+          cache-key: flatpak-builder-x86_64-${{ github.sha }}
           upload-artifact: false
