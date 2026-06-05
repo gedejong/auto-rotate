@@ -59,9 +59,14 @@ jobs:
           done
           echo "--- app log ---"; cat /tmp/app.log || true
           if [ -z "$WID" ]; then echo "::error::GUI window never appeared"; exit 1; fi
-          sleep 8  # let the demo render both preview panes
-          import -window "$WID" packaging/flatpak/screenshot.png
-          convert packaging/flatpak/screenshot.png -trim +repage packaging/flatpak/screenshot.png
+          xdotool windowactivate "$WID" 2>/dev/null || true
+          xdotool windowraise "$WID" 2>/dev/null || true
+          sleep 10  # let the demo finish and render both preview panes
+          # Grab the whole root screen (reliable), then crop to the window's geometry.
+          eval "$(xdotool getwindowgeometry --shell "$WID")"
+          import -window root /tmp/full.png
+          convert /tmp/full.png -crop "${WIDTH}x${HEIGHT}+${X}+${Y}" +repage \
+            packaging/flatpak/screenshot.png
           kill "$APP_PID" 2>/dev/null || true
           identify packaging/flatpak/screenshot.png
 
