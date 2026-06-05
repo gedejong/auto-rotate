@@ -11,7 +11,7 @@ from .errors import (
 )
 from .pipeline import PageResult, deskew_pdf
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 __all__ = [
     "AutoRotateError",

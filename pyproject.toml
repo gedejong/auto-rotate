@@ -1,6 +1,6 @@
 [project]
 name = "auto-rotate"
-version = "0.1.0"
+version = "0.1.1"
 description = "Automatically deskew and turn upright every page of a PDF (jdeskew + Tesseract OSD)."
 readme = "README.md"
 license = "BSD-3-Clause"
@@ -114,7 +114,7 @@ omit = ["*/gui/app.py", "*/auto_rotate/__main__.py"]
 [tool.briefcase]
 project_name = "Auto-Rotate"
 bundle = "dev.gedejong"
-version = "0.1.0"
+version = "0.1.1"
 url = "https://github.com/gedejong/auto-rotate"
 author = "Edwin de Jong"
 author_email = "edejong@fastmail.fm"

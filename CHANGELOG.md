@@ -6,6 +6,21 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-06-05
+
+### Added
+
+- New hand-drawn application logo and a regenerated icon set, used by the desktop
+  app (macOS/Windows/Linux) and the README.
+- Distribution: published to a Homebrew tap
+  (`brew install --cask gedejong/auto-rotate/auto-rotate`, auto-bumped on release);
+  winget and Flathub submissions opened.
+
+### Changed
+
+- README documents the unsigned desktop builds and recommends `pipx` for a
+  prompt-free install.
+
 ## [0.1.0] - 2026-06-05
 
 ### Added
@@ -28,5 +43,6 @@ All notable changes to this project are documented here. The format is based on
   with an augmented environment — so orientation/OCR work in the packaged app instead of
   being greyed out.
 
-[Unreleased]: https://github.com/gedejong/auto-rotate/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/gedejong/auto-rotate/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/gedejong/auto-rotate/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/gedejong/auto-rotate/releases/tag/v0.1.0
