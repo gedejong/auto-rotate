@@ -15,6 +15,7 @@ on:
 jobs:
   screenshot:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -46,15 +47,21 @@ jobs:
           sleep 2
           AUTO_ROTATE_DEMO_PDF="$PWD/sample_scan.pdf" .venv/bin/auto-rotate-gui >/tmp/app.log 2>&1 &
           APP_PID=$!
-          # Wait for the window, then for the demo to render both previews.
-          xdotool search --sync --name "Auto-Rotate" >/dev/null
-          sleep 12
-          WID=$(xdotool search --name "Auto-Rotate" | head -1)
+          # Poll up to ~60s for the window (don't block forever if the app crashes).
+          WID=""
+          for _ in $(seq 1 30); do
+            WID=$(xdotool search --name "Auto-Rotate" 2>/dev/null | head -1 || true)
+            [ -n "$WID" ] && break
+            kill -0 "$APP_PID" 2>/dev/null || { echo "App exited before opening a window."; break; }
+            sleep 2
+          done
+          echo "--- app log ---"; cat /tmp/app.log || true
+          if [ -z "$WID" ]; then echo "::error::GUI window never appeared"; exit 1; fi
+          sleep 8  # let the demo render both preview panes
           import -window "$WID" packaging/flatpak/screenshot.png
           convert packaging/flatpak/screenshot.png -trim +repage packaging/flatpak/screenshot.png
           kill "$APP_PID" 2>/dev/null || true
           identify packaging/flatpak/screenshot.png
-          echo "--- app log tail ---"; tail -n 20 /tmp/app.log || true
 
       - uses: actions/upload-artifact@v4
         with:
