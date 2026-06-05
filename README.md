@@ -28,15 +28,21 @@ PDF page
 
 **Desktop app (no Python needed)** — download the installer for your OS from the
 [latest release](https://github.com/gedejong/auto-rotate/releases): Windows `.msi`,
-macOS `.dmg` (Apple Silicon, macOS 14+), or Linux `.deb`/`.rpm`/Flatpak. (Until the app is
-code-signed, macOS needs a right-click → Open on first launch, and Windows SmartScreen needs
-"Run anyway".)
+macOS `.dmg` (Apple Silicon, macOS 14+), or Linux `.deb`/`.rpm`/Flatpak.
 
-**CLI / library** via [pipx](https://pipx.pypa.io/) or pip:
+> The desktop builds are **not code-signed** (this is a free open-source project without
+> Apple/Windows signing certificates), so the OS warns on first launch:
+> - **macOS:** right-click the app → **Open** (or System Settings → Privacy & Security →
+>   **Open Anyway**). One time only. To skip the prompt entirely, install via `pipx` below.
+> - **Windows:** SmartScreen → **More info** → **Run anyway**.
+
+**CLI / library / GUI** via [pipx](https://pipx.pypa.io/) or pip — no Gatekeeper/SmartScreen
+prompt, since nothing is downloaded as an app bundle:
 
 ```bash
 pipx install auto-rotate            # the `auto-rotate` command
 pipx install "auto-rotate[ocr]"     # + the `--ocr` capability
+pipx install "auto-rotate[gui]"     # + the `auto-rotate-gui` desktop app
 pip install auto-rotate             # as a library
 ```
 
