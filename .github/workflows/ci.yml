@@ -51,4 +51,6 @@ jobs:
       - name: Sync
         run: uv sync
       - name: Integration tests
-        run: uv run pytest -m integration
+        # --no-cov: this job runs only the single end-to-end test, so the suite-wide
+        # coverage floor in pyproject's addopts doesn't apply here.
+        run: uv run pytest -m integration --no-cov
