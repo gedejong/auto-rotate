@@ -28,10 +28,9 @@
     <clipPath id="pageclip" clipPathUnits="userSpaceOnUse">
       <path d="M -70.0,-113.0 L 30.0,-113.0 Q 43.0,-113.0 52.1923,-103.8077 L 81.8077,-74.1923 Q 91.0,-65.0 91.0,-52.0 L 91.0,92.0 Q 91.0,113.0 70.0,113.0 L -70.0,113.0 Q -91.0,113.0 -91.0,92.0 L -91.0,-92.0 Q -91.0,-113.0 -70.0,-113.0 Z"/>
     </clipPath>
-    <mask id="pagecut" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
-      <rect width="512" height="512" fill="white"/>
-      <g transform="translate(238.0,244.0) rotate(-39.0)"><path d="M -70.0,-131.0 L 12.0,-131.0 Q 43.0,-131.0 64.92009999999999,-109.07990000000001 L 87.07990000000001,-86.92009999999999 Q 109.0,-65.0 109.0,-34.0 L 109.0,92.0 Q 109.0,131.0 70.0,131.0 L -70.0,131.0 Q -109.0,131.0 -109.0,92.0 L -109.0,-92.0 Q -109.0,-131.0 -70.0,-131.0 Z" fill="black"/></g>
-    </mask>
+    <clipPath id="pagehalo" clipPathUnits="userSpaceOnUse">
+      <path d="M -70.0,-131.0 L 12.0,-131.0 Q 43.0,-131.0 64.92009999999999,-109.07990000000001 L 87.07990000000001,-86.92009999999999 Q 109.0,-65.0 109.0,-34.0 L 109.0,92.0 Q 109.0,131.0 70.0,131.0 L -70.0,131.0 Q -109.0,131.0 -109.0,92.0 L -109.0,-92.0 Q -109.0,-131.0 -70.0,-131.0 Z" transform="translate(238.0,244.0) rotate(-39.0)"/>
+    </clipPath>
   </defs>
 
   <g clip-path="url(#squircle)">
@@ -41,10 +40,17 @@
     <circle cx="256.0" cy="252.0" r="246.0" fill="url(#discHi)"/>
   </g>
 
-  <g mask="url(#pagecut)">
+  <g>
     <path d="M 92.52,227.17 A 166.00,166.00 0 1 0 343.97,115.22" fill="none" stroke="#ffffff" stroke-width="34.0" stroke-linecap="round"/>
     <path d="M 299.87,87.67 L 364.63,82.15 L 323.30,148.30 Z" fill="#ffffff"/>
   </g>
+
+  <g clip-path="url(#squircle)"><g clip-path="url(#pagehalo)">
+    <rect width="512" height="512" fill="url(#bg)"/>
+    <rect width="512" height="512" fill="url(#vignette)"/>
+    <circle cx="256.0" cy="252.0" r="246.0" fill="url(#disc)"/>
+    <circle cx="256.0" cy="252.0" r="246.0" fill="url(#discHi)"/>
+  </g></g>
 
   <g transform="translate(238.0,244.0) rotate(-39.0)">
       <path d="M -70.0,-113.0 L 30.0,-113.0 Q 43.0,-113.0 52.1923,-103.8077 L 81.8077,-74.1923 Q 91.0,-65.0 91.0,-52.0 L 91.0,92.0 Q 91.0,113.0 70.0,113.0 L -70.0,113.0 Q -91.0,113.0 -91.0,92.0 L -91.0,-92.0 Q -91.0,-113.0 -70.0,-113.0 Z" fill="url(#page)" stroke="#ffffff" stroke-width="26.0"
