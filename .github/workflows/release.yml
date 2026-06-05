@@ -76,7 +76,7 @@ jobs:
           uvx briefcase package linux
 
       - name: Attach installers to the release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: dist/*
           fail_on_unmatched_files: true
