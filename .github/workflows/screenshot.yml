@@ -59,11 +59,21 @@ jobs:
           done
           echo "--- app log ---"; cat /tmp/app.log || true
           if [ -z "$WID" ]; then echo "::error::GUI window never appeared"; exit 1; fi
+          sleep 10  # let the demo finish and render both preview panes
+          # Toga/GTK creates several windows with this title; pick the largest (the main one).
+          WID=""; best_area=0
+          for wid in $(xdotool search --name "Auto-Rotate" 2>/dev/null); do
+            unset WIDTH HEIGHT X Y
+            eval "$(xdotool getwindowgeometry --shell "$wid")"
+            area=$(( ${WIDTH:-0} * ${HEIGHT:-0} ))
+            echo "candidate $wid: ${WIDTH:-?}x${HEIGHT:-?}"
+            if [ "$area" -gt "$best_area" ]; then best_area=$area; WID=$wid; fi
+          done
           xdotool windowactivate "$WID" 2>/dev/null || true
           xdotool windowraise "$WID" 2>/dev/null || true
-          sleep 10  # let the demo finish and render both preview panes
-          # Grab the whole root screen (reliable), then crop to the window's geometry.
+          sleep 2
           eval "$(xdotool getwindowgeometry --shell "$WID")"
+          echo "capturing window $WID: ${WIDTH}x${HEIGHT}+${X}+${Y}"
           import -window root /tmp/full.png
           convert /tmp/full.png -crop "${WIDTH}x${HEIGHT}+${X}+${Y}" +repage \
             packaging/flatpak/screenshot.png
