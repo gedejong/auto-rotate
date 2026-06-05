@@ -67,7 +67,11 @@ jobs:
           uvx briefcase build windows
           uvx briefcase package windows
 
-      # Linux: Briefcase uses Docker on the runner to build a .deb for the system backend.
+      # Linux: Briefcase builds the .deb natively on the runner, so the GTK/cairo dev
+      # packages it needs (and ghostscript for the GUI's OCR helper) must be present.
+      - name: Linux build deps
+        if: matrix.briefcase-platform == 'linux'
+        run: sudo apt-get update && sudo apt-get install -y gir1.2-gtk-3.0 libcairo2-dev libgirepository1.0-dev pkg-config
       - name: Package (Linux)
         if: matrix.briefcase-platform == 'linux'
         run: |
