@@ -6,6 +6,17 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Added
+
+- GUI: before/after previews of the first queued file's first page.
+
+### Fixed
+
+- GUI/desktop app now finds `tesseract`/`ocrmypdf` even when they are not on `PATH`
+  (common install dirs like `/opt/homebrew/bin` are searched), and invokes them by
+  absolute path with an augmented environment. Previously the packaged app greyed out
+  orientation/OCR despite the binaries being installed.
+
 ## [0.1.0] - 2026-06-05
 
 ### Added

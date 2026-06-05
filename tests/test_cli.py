@@ -42,7 +42,7 @@ def test_cli_missing_tesseract_reports_error(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    monkeypatch.setattr(shutil, "which", lambda _name: None)
+    monkeypatch.setattr(shutil, "which", lambda *a, **k: None)
     code = cli.main([str(skewed_pdf), str(tmp_path / "out.pdf")])  # orient defaults on
     assert code == 1
     assert "tesseract" in capsys.readouterr().err.lower()
@@ -54,7 +54,7 @@ def test_cli_missing_ocrmypdf_reports_error(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    monkeypatch.setattr(shutil, "which", lambda _name: None)
+    monkeypatch.setattr(shutil, "which", lambda *a, **k: None)
     code = cli.main([str(skewed_pdf), str(tmp_path / "out.pdf"), "--no-orient", "--ocr"])
     assert code == 1
     assert "ocrmypdf" in capsys.readouterr().err.lower()

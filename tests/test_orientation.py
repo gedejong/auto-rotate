@@ -42,7 +42,7 @@ def test_apply_cardinal_90_is_clockwise() -> None:
 
 
 def test_detect_cardinal_rotation_reads_osd(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(orientation, "tesseract_available", lambda: True)
+    monkeypatch.setattr(orientation, "find_binary", lambda _name: "/usr/bin/tesseract")
     monkeypatch.setattr(pytesseract, "image_to_osd", lambda *a, **k: {"rotate": 90})
     assert detect_cardinal_rotation(_sample()) == 90
 
@@ -50,7 +50,7 @@ def test_detect_cardinal_rotation_reads_osd(monkeypatch: pytest.MonkeyPatch) -> 
 def test_detect_cardinal_rotation_falls_back_on_osd_error(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(orientation, "tesseract_available", lambda: True)
+    monkeypatch.setattr(orientation, "find_binary", lambda _name: "/usr/bin/tesseract")
 
     def _raise(*_a: object, **_k: object) -> dict[str, int]:
         raise pytesseract.TesseractError(1, "no text")
@@ -62,7 +62,7 @@ def test_detect_cardinal_rotation_falls_back_on_osd_error(
 def test_detect_cardinal_rotation_ignores_unexpected_value(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(orientation, "tesseract_available", lambda: True)
+    monkeypatch.setattr(orientation, "find_binary", lambda _name: "/usr/bin/tesseract")
     monkeypatch.setattr(pytesseract, "image_to_osd", lambda *a, **k: {"rotate": 45})
     assert detect_cardinal_rotation(_sample()) == 0
 
@@ -70,7 +70,7 @@ def test_detect_cardinal_rotation_ignores_unexpected_value(
 def test_detect_cardinal_rotation_requires_tesseract(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(orientation, "tesseract_available", lambda: False)
+    monkeypatch.setattr(orientation, "find_binary", lambda _name: None)
     with pytest.raises(TesseractMissing):
         detect_cardinal_rotation(_sample())
 

@@ -10,10 +10,15 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
+from PIL import Image
+
 from ..deskew import DEFAULT_ANGLE_MAX
 from ..ocr import ocrmypdf_available
 from ..orientation import tesseract_available
 from ..pipeline import PageResult, deskew_pdf
+from ..raster import render_pages
+
+PREVIEW_MAX_PX = 360
 
 
 @dataclass(frozen=True)
@@ -43,6 +48,13 @@ class Options:
 def default_output_path(input_pdf: Path) -> Path:
     """Suggested output path: ``<name> - upright.pdf`` beside the input."""
     return input_pdf.with_name(f"{input_pdf.stem} - upright.pdf")
+
+
+def render_preview(pdf_path: Path, max_px: int = PREVIEW_MAX_PX) -> Image.Image:
+    """Render the first page of ``pdf_path`` as a thumbnail (RGB) for previewing."""
+    page = next(render_pages(pdf_path, dpi=100))
+    page.thumbnail((max_px, max_px))
+    return page
 
 
 def process_file(

@@ -11,7 +11,6 @@ from __future__ import annotations
 import contextlib
 import logging
 import os
-import shutil
 import tempfile
 from typing import Any, cast
 
@@ -20,6 +19,7 @@ import pytesseract
 from numpy.typing import NDArray
 from PIL import Image
 
+from .binaries import find_binary
 from .errors import TesseractMissing
 
 logger = logging.getLogger(__name__)
@@ -28,8 +28,8 @@ VALID_ROTATIONS = (0, 90, 180, 270)
 
 
 def tesseract_available() -> bool:
-    """Return whether the ``tesseract`` binary is on PATH."""
-    return shutil.which("tesseract") is not None
+    """Return whether the ``tesseract`` binary can be found (PATH or common dirs)."""
+    return find_binary("tesseract") is not None
 
 
 def detect_cardinal_rotation(image: NDArray[np.uint8]) -> int:
@@ -38,11 +38,14 @@ def detect_cardinal_rotation(image: NDArray[np.uint8]) -> int:
     Falls back to ``0`` when Tesseract cannot determine orientation (e.g. a blank
     or text-sparse page). Raises :class:`TesseractMissing` if the binary is absent.
     """
-    if not tesseract_available():
+    tesseract = find_binary("tesseract")
+    if tesseract is None:
         raise TesseractMissing(
             "Cardinal-orientation detection requires the `tesseract` binary. "
             "Install it (e.g. `brew install tesseract`) or pass --no-orient."
         )
+    # Pin the resolved path so pytesseract works even when PATH is minimal (GUI apps).
+    pytesseract.pytesseract.tesseract_cmd = tesseract
     # Write a temp PNG and pass its path to Tesseract. Letting pytesseract handle
     # an in-memory image relies on its own NamedTemporaryFile plumbing, which is
     # fragile (Windows, sandboxed temp dirs); a closed file path is portable.

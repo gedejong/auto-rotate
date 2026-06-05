@@ -14,7 +14,13 @@ from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
 
 from ..pipeline import PageResult
-from .controller import Options, available_features, default_output_path, process_file
+from .controller import (
+    Options,
+    available_features,
+    default_output_path,
+    process_file,
+    render_preview,
+)
 
 APP_ID = "dev.gedejong.autorotate"
 FORMAL_NAME = "Auto-Rotate"
@@ -48,7 +54,24 @@ class AutoRotateApp(toga.App):
         self._run_btn = toga.Button("Run", on_press=self._on_run)
         # max=None -> indeterminate spinner (valid at runtime; the stub omits None).
         self._progress = toga.ProgressBar(max=None)  # pyright: ignore[reportArgumentType]
-        self._log = toga.MultilineTextInput(readonly=True, style=Pack(flex=1))
+        self._log = toga.MultilineTextInput(readonly=True, style=Pack(flex=1, height=120))
+
+        # Before/after previews of the first queued file's first page.
+        self._input_view = toga.ImageView(style=Pack(width=300, height=380))
+        self._output_view = toga.ImageView(style=Pack(width=300, height=380))
+        preview_row = toga.Box(
+            children=[
+                toga.Box(
+                    children=[toga.Label("Input"), self._input_view],
+                    style=Pack(direction=COLUMN, margin_right=12),
+                ),
+                toga.Box(
+                    children=[toga.Label("Output"), self._output_view],
+                    style=Pack(direction=COLUMN),
+                ),
+            ],
+            style=Pack(direction=ROW),
+        )
 
         children: list[toga.Widget] = [
             toga.Label("Files", style=Pack(font_weight="bold")),
@@ -70,12 +93,14 @@ class AutoRotateApp(toga.App):
         children += [
             self._run_btn,
             self._progress,
+            toga.Label("Preview", style=Pack(font_weight="bold", margin_top=8)),
+            preview_row,
             toga.Label("Log", style=Pack(font_weight="bold", margin_top=8)),
             self._log,
         ]
 
         # Hold a precisely-typed reference; App.main_window's type is a broad union.
-        self._window = toga.MainWindow(title=self.formal_name, size=(640, 680))
+        self._window = toga.MainWindow(title=self.formal_name, size=(700, 900))
         self._window.content = toga.Box(
             children=children, style=Pack(direction=COLUMN, margin=12, gap=4)
         )
@@ -89,13 +114,24 @@ class AutoRotateApp(toga.App):
         if result:
             self._files.extend(Path(p) for p in result)
             self._refresh_files()
+            self._set_preview(self._input_view, self._files[0])
+            self._output_view.image = None
 
     def _on_clear(self, widget: toga.Widget) -> None:
         self._files.clear()
         self._refresh_files()
+        self._input_view.image = None
+        self._output_view.image = None
 
     def _refresh_files(self) -> None:
         self._file_label.text = "\n".join(f.name for f in self._files) or "No files added."
+
+    def _set_preview(self, view: toga.ImageView, pdf: Path) -> None:
+        """Render ``pdf``'s first page into ``view``; clear it on failure."""
+        try:
+            view.image = toga.Image(render_preview(pdf))
+        except Exception:  # a broken/missing PDF shouldn't crash the UI
+            view.image = None
 
     def _append(self, text: str) -> None:
         self._log.value = f"{self._log.value}{text}\n" if self._log.value else f"{text}\n"
@@ -136,6 +172,8 @@ class AutoRotateApp(toga.App):
             try:
                 await loop.run_in_executor(None, work)
                 self._append(f"  done → {output}")
+                if pdf == self._files[0]:
+                    self._set_preview(self._output_view, output)
             except Exception as exc:  # surface any failure (bad PDF, missing binary) in the log
                 self._append(f"  error: {exc}")
 
