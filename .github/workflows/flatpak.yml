@@ -1,7 +1,8 @@
 name: Flatpak
 
-# Builds the Flatpak in the Flathub builder container to validate the manifest before
-# submitting to Flathub. Runs on the flathub branch and on demand.
+# Builds the Flatpak in the Flathub builder container (both arches) to validate the
+# manifest before submitting to Flathub, and uploads the generated offline dependency
+# set so it can be committed for the Flathub repo.
 on:
   push:
     branches: [flathub]
@@ -12,8 +13,14 @@ on:
 
 jobs:
   flatpak:
-    name: Build (x86_64)
-    runs-on: ubuntu-latest
+    name: Build (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { runner: ubuntu-latest, arch: x86_64 }
+          - { runner: ubuntu-24.04-arm, arch: aarch64 }
+    runs-on: ${{ matrix.runner }}
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-47
       options: --privileged
@@ -27,10 +34,8 @@ jobs:
           python3 -m pip install --quiet requirements-parser aiohttp toml
           # The repo's `flatpak-pip-generator` is a symlink; fetch the real .py.
           curl -fL -o fpg.py https://raw.githubusercontent.com/flatpak/flatpak-builder-tools/master/pip/flatpak-pip-generator.py
-          # Binary-wheel packages must use platform wheels (no usable sdist build);
-          # pygobject/pycairo stay as sdists built against the runtime. Both arches.
-          # lxml/pygobject/pycairo ship in the GNOME runtime (read-only), so don't vendor
-          # them — pip uses the runtime copies at build time.
+          # Binary-wheel packages use platform wheels (both arches); lxml/pygobject/pycairo
+          # ship in the GNOME runtime (read-only), so pip uses the runtime copies.
           python3 fpg.py \
             --runtime=org.gnome.Sdk//47 \
             --requirements-file=requirements.txt \
@@ -41,9 +46,18 @@ jobs:
           echo "=== generated python3-deps.json (first module) ==="
           head -n 30 python3-deps.json
 
+      # The generated set is identical across arches (it carries both arches' wheel
+      # sources), so upload it once for committing into the Flathub repo.
+      - name: Upload generated deps
+        if: matrix.arch == 'x86_64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: python3-deps
+          path: packaging/flatpak/python3-deps.json
+
       - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
-          bundle: auto-rotate.flatpak
+          bundle: auto-rotate-${{ matrix.arch }}.flatpak
           manifest-path: packaging/flatpak/io.github.gedejong.auto_rotate.yaml
-          cache-key: flatpak-builder-${{ github.sha }}
-          upload-artifact: true
+          cache-key: flatpak-builder-${{ matrix.arch }}-${{ github.sha }}
+          upload-artifact: false
