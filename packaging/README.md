@@ -7,6 +7,11 @@
 | winget (Windows) | template | `winget/` stub; submit to `microsoft/winget-pkgs` after a release. |
 | Flathub (Linux) | template | `flatpak/dev.gedejong.autorotate.yaml` stub; submit to Flathub after a release. |
 
+## macOS signing & notarization
+
+See [`macos-signing.md`](macos-signing.md). When the `MACOS_*` secrets are set, the release
+job signs with a Developer ID and notarizes via Briefcase; otherwise it ad-hoc signs.
+
 ## Homebrew cask auto-bump
 
 The `homebrew` job in `release.yml` updates the tap's `Casks/auto-rotate.rb` (version +
