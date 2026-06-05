@@ -25,12 +25,13 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m pip install --quiet requirements-parser aiohttp toml
-          curl -fLO https://raw.githubusercontent.com/flatpak/flatpak-builder-tools/master/pip/flatpak-pip-generator
-          python3 flatpak-pip-generator \
+          # The repo's `flatpak-pip-generator` is a symlink; fetch the real .py.
+          curl -fL -o fpg.py https://raw.githubusercontent.com/flatpak/flatpak-builder-tools/master/pip/flatpak-pip-generator.py
+          python3 fpg.py \
             --runtime=org.gnome.Sdk//47 \
             --requirements-file=requirements.txt \
             --output=python3-deps
-          rm -f flatpak-pip-generator
+          rm -f fpg.py
           echo "=== generated python3-deps.json (first module) ==="
           head -n 30 python3-deps.json
 
