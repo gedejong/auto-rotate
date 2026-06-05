@@ -1,0 +1,62 @@
+name: Screenshot
+
+# Captures a real screenshot of the GUI (preloaded with a generated bad scan, showing the
+# before/after previews) for the Flathub AppStream metadata. Uploads it as an artifact to
+# review and commit.
+on:
+  workflow_dispatch:
+  push:
+    branches: [flathub]
+    paths:
+      - "packaging/flatpak/make_sample_scan.py"
+      - "src/auto_rotate/gui/app.py"
+      - ".github/workflows/screenshot.yml"
+
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install GTK runtime + capture tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            python3-gi python3-gi-cairo python3-cairo gir1.2-gtk-3.0 \
+            xvfb openbox xdotool imagemagick
+
+      - name: Install the app (system GTK, no pygobject build)
+        run: |
+          python3 -m venv --system-site-packages .venv
+          .venv/bin/pip install --upgrade pip
+          # Install from the checked-out branch (it carries the demo hook 0.1.0 lacks).
+          .venv/bin/pip install .
+          .venv/bin/pip install --no-deps toga-core==0.5.4 toga-gtk==0.5.4 travertino==0.5.4
+
+      - name: Generate the sample bad scan
+        run: .venv/bin/python packaging/flatpak/make_sample_scan.py "$PWD/sample_scan.pdf"
+
+      - name: Launch the GUI and capture the window
+        run: |
+          set -euo pipefail
+          export DISPLAY=:99
+          Xvfb :99 -screen 0 1280x1024x24 >/dev/null 2>&1 &
+          sleep 2
+          openbox >/dev/null 2>&1 &
+          sleep 2
+          AUTO_ROTATE_DEMO_PDF="$PWD/sample_scan.pdf" .venv/bin/auto-rotate-gui >/tmp/app.log 2>&1 &
+          APP_PID=$!
+          # Wait for the window, then for the demo to render both previews.
+          xdotool search --sync --name "Auto-Rotate" >/dev/null
+          sleep 12
+          WID=$(xdotool search --name "Auto-Rotate" | head -1)
+          import -window "$WID" packaging/flatpak/screenshot.png
+          convert packaging/flatpak/screenshot.png -trim +repage packaging/flatpak/screenshot.png
+          kill "$APP_PID" 2>/dev/null || true
+          identify packaging/flatpak/screenshot.png
+          echo "--- app log tail ---"; tail -n 20 /tmp/app.log || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: screenshot
+          path: packaging/flatpak/screenshot.png

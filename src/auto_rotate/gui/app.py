@@ -7,6 +7,8 @@ selection, and a background worker that streams per-page progress into a log.
 from __future__ import annotations
 
 import asyncio
+import os
+import tempfile
 from pathlib import Path
 
 import toga
@@ -106,6 +108,25 @@ class AutoRotateApp(toga.App):
         )
         self.main_window = self._window
         self._window.show()
+
+        # Demo hook (used only by the screenshot CI job): preload a sample PDF, run the
+        # clean+deskew, and populate both preview panes. Gated behind an env var so it
+        # never affects normal use.
+        demo_pdf = os.environ.get("AUTO_ROTATE_DEMO_PDF")
+        if demo_pdf:
+            self.loop.create_task(self._run_demo(Path(demo_pdf)))
+
+    async def _run_demo(self, pdf: Path) -> None:
+        self._files = [pdf]
+        self._refresh_files()
+        self._set_preview(self._input_view, pdf)
+        self._clean.value = True
+        output = Path(tempfile.gettempdir()) / "auto_rotate_demo_out.pdf"
+        options = Options(dpi=200, orient=False, clean=True)
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, lambda: process_file(pdf, output, options))
+        self._set_preview(self._output_view, output)
+        self._append("Cleaned a sample scanned document.")
 
     async def _on_add(self, widget: toga.Widget) -> None:
         result = await self._window.dialog(
