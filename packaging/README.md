@@ -5,7 +5,7 @@
 | PyPI | **live** | Published on tag via Trusted Publishing (`release.yml` → `pypi` job). |
 | Homebrew (macOS) | **live** | Tap [`gedejong/homebrew-auto-rotate`](https://github.com/gedejong/homebrew-auto-rotate); cask auto-bumped on each release (see below). `homebrew/auto-rotate.rb` here is the original template. |
 | winget (Windows) | ready to submit | `winget/` holds the three 0.1.0 manifests (schema-validated, real SHA-256 + ProductCode). See "winget submission" below. |
-| Flathub (Linux) | not started | Needs an offline-from-source Flatpak build of the full native stack + AppStream metadata; only build-testable on Linux. Bigger effort — see notes below. |
+| Flathub (Linux) | in progress | `flatpak/` has the manifest, AppStream metainfo, desktop file, and a CI build job (`flatpak.yml`). App ID is `io.github.gedejong.auto_rotate` (Flathub requires a repo/domain-derived ID). Tesseract isn't bundled, so orient/OCR are off in the sandbox. |
 
 ## winget submission
 

@@ -1,0 +1,42 @@
+name: Flatpak
+
+# Builds the Flatpak in the Flathub builder container to validate the manifest before
+# submitting to Flathub. Runs on the flathub branch and on demand.
+on:
+  push:
+    branches: [flathub]
+    paths:
+      - "packaging/flatpak/**"
+      - ".github/workflows/flatpak.yml"
+  workflow_dispatch:
+
+jobs:
+  flatpak:
+    name: Build (x86_64)
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-47
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate offline Python dependency sources
+        working-directory: packaging/flatpak
+        run: |
+          set -euo pipefail
+          python3 -m pip install --quiet requirements-parser aiohttp toml
+          curl -fLO https://raw.githubusercontent.com/flatpak/flatpak-builder-tools/master/pip/flatpak-pip-generator
+          python3 flatpak-pip-generator \
+            --runtime=org.gnome.Sdk//47 \
+            --requirements-file=requirements.txt \
+            --output=python3-deps
+          rm -f flatpak-pip-generator
+          echo "=== generated python3-deps.json (first module) ==="
+          head -n 30 python3-deps.json
+
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: auto-rotate.flatpak
+          manifest-path: packaging/flatpak/io.github.gedejong.auto_rotate.yaml
+          cache-key: flatpak-builder-${{ github.sha }}
+          upload-artifact: true
