@@ -90,3 +90,38 @@ jobs:
         with:
           files: dist/*
           fail_on_unmatched_files: true
+
+  homebrew:
+    name: Bump Homebrew cask
+    needs: installers
+    runs-on: ubuntu-latest
+    # Requires a fine-grained PAT (contents:write on gedejong/homebrew-auto-rotate)
+    # stored as the HOMEBREW_TAP_TOKEN secret. Inert until that secret exists.
+    env:
+      TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+    steps:
+      - name: Update cask version + sha256 in the tap
+        if: env.TAP_TOKEN != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          # Pull the published .dmg and hash it (the cask's checksum).
+          mkdir -p /tmp/rel
+          gh release download "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --pattern '*.dmg' --dir /tmp/rel
+          sha="$(sha256sum /tmp/rel/*.dmg | awk '{print $1}')"
+          # Clone the tap and rewrite the version/sha256 stanzas.
+          git clone "https://x-access-token:${TAP_TOKEN}@github.com/${GITHUB_REPOSITORY_OWNER}/homebrew-auto-rotate.git" tap
+          cd tap
+          sed -i -E "s/^  version \".*\"/  version \"${version}\"/" Casks/auto-rotate.rb
+          sed -i -E "s/^  sha256 \".*\"/  sha256 \"${sha}\"/" Casks/auto-rotate.rb
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/auto-rotate.rb
+          if git diff --cached --quiet; then
+            echo "Cask already up to date for ${version}."
+          else
+            git commit -m "auto-rotate ${version}"
+            git push
+          fi
