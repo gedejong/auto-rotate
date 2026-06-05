@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
+     width="512" height="512" role="img" aria-label="Auto-Rotate">
+  <defs>
+    <linearGradient id="bg" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0.00" stop-color="#1d4068"/>
+      <stop offset="0.50" stop-color="#15545f"/>
+      <stop offset="1.00" stop-color="#0a5249"/>
+    </linearGradient>
+    <radialGradient id="vignette" cx="0.5" cy="0.5" r="0.72">
+      <stop offset="0.00" stop-color="#06263c" stop-opacity="0.00"/>
+      <stop offset="0.55" stop-color="#06263c" stop-opacity="0.00"/>
+      <stop offset="1.00" stop-color="#051f31" stop-opacity="0.72"/>
+    </radialGradient>
+    <linearGradient id="disc" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0.00" stop-color="#23698c" stop-opacity="1.00"/>
+      <stop offset="0.50" stop-color="#1a738a" stop-opacity="1.00"/>
+      <stop offset="1.00" stop-color="#0a7a6f" stop-opacity="1.00"/>
+    </linearGradient>
+    <radialGradient id="discHi" cx="0.5" cy="0.42" r="0.5">
+      <stop offset="0" stop-color="#bfeeff" stop-opacity="0.13"/>
+      <stop offset="1" stop-color="#bfeeff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="page" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dbe8f2"/>
+      <stop offset="1" stop-color="#bdd3e3"/>
+    </linearGradient>
+    <clipPath id="squircle"><path d="M 140.06,0 L 371.94,0 L 394.68,0.20 L 407.98,0.79 L 419.05,1.78 L 428.82,3.16 L 437.66,4.94 L 445.77,7.12 L 453.25,9.69 L 460.17,12.66 L 466.59,16.02 L 472.54,19.79 L 478.04,23.97 L 483.11,28.55 L 487.75,33.56 L 491.97,38.99 L 495.79,44.87 L 499.19,51.21 L 502.20,58.06 L 504.80,65.45 L 507.00,73.46 L 508.80,82.19 L 510.20,91.85 L 511.20,102.79 L 511.80,115.94 L 512.00,138.40 L 512.00,373.60 L 511.80,396.06 L 511.20,409.21 L 510.20,420.15 L 508.80,429.81 L 507.00,438.54 L 504.80,446.55 L 502.20,453.94 L 499.19,460.79 L 495.79,467.13 L 491.97,473.01 L 487.75,478.44 L 483.11,483.45 L 478.04,488.03 L 472.54,492.21 L 466.59,495.98 L 460.17,499.34 L 453.25,502.31 L 445.77,504.88 L 437.66,507.06 L 428.82,508.84 L 419.05,510.22 L 407.98,511.21 L 394.68,511.80 L 371.94,512.00 L 140.06,512.00 L 117.32,511.80 L 104.02,511.21 L 92.95,510.22 L 83.18,508.84 L 74.34,507.06 L 66.23,504.88 L 58.75,502.31 L 51.83,499.34 L 45.41,495.98 L 39.46,492.21 L 33.96,488.03 L 28.89,483.45 L 24.25,478.44 L 20.03,473.01 L 16.21,467.13 L 12.81,460.79 L 9.80,453.94 L 7.20,446.55 L 5.00,438.54 L 3.20,429.81 L 1.80,420.15 L 0.80,409.21 L 0.20,396.06 L 0.00,373.60 L 0,138.40 L 0.20,115.94 L 0.80,102.79 L 1.80,91.85 L 3.20,82.19 L 5.00,73.46 L 7.20,65.45 L 9.80,58.06 L 12.81,51.21 L 16.21,44.87 L 20.03,38.99 L 24.25,33.56 L 28.89,28.55 L 33.96,23.97 L 39.46,19.79 L 45.41,16.02 L 51.83,12.66 L 58.75,9.69 L 66.23,7.12 L 74.34,4.94 L 83.18,3.16 L 92.95,1.78 L 104.02,0.79 L 117.32,0.20 L 140.06,0.00 Z"/></clipPath>
+    <clipPath id="pageclip" clipPathUnits="userSpaceOnUse">
+      <path d="M -70.0,-113.0 L 30.0,-113.0 Q 43.0,-113.0 52.1923,-103.8077 L 81.8077,-74.1923 Q 91.0,-65.0 91.0,-52.0 L 91.0,92.0 Q 91.0,113.0 70.0,113.0 L -70.0,113.0 Q -91.0,113.0 -91.0,92.0 L -91.0,-92.0 Q -91.0,-113.0 -70.0,-113.0 Z"/>
+    </clipPath>
+    <mask id="pagecut" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+      <rect width="512" height="512" fill="white"/>
+      <g transform="translate(238.0,244.0) rotate(-39.0)"><path d="M -70.0,-131.0 L 12.0,-131.0 Q 43.0,-131.0 64.92009999999999,-109.07990000000001 L 87.07990000000001,-86.92009999999999 Q 109.0,-65.0 109.0,-34.0 L 109.0,92.0 Q 109.0,131.0 70.0,131.0 L -70.0,131.0 Q -109.0,131.0 -109.0,92.0 L -109.0,-92.0 Q -109.0,-131.0 -70.0,-131.0 Z" fill="black"/></g>
+    </mask>
+  </defs>
+
+  <g clip-path="url(#squircle)">
+    <rect width="512" height="512" fill="url(#bg)"/>
+    <rect width="512" height="512" fill="url(#vignette)"/>
+    <circle cx="256.0" cy="252.0" r="246.0" fill="url(#disc)"/>
+    <circle cx="256.0" cy="252.0" r="246.0" fill="url(#discHi)"/>
+  </g>
+
+  <g mask="url(#pagecut)">
+    <path d="M 92.52,227.17 A 166.00,166.00 0 1 0 343.97,115.22" fill="none" stroke="#ffffff" stroke-width="34.0" stroke-linecap="round"/>
+    <path d="M 299.87,87.67 L 364.63,82.15 L 323.30,148.30 Z" fill="#ffffff"/>
+  </g>
+
+  <g transform="translate(238.0,244.0) rotate(-39.0)">
+      <path d="M -70.0,-113.0 L 30.0,-113.0 Q 43.0,-113.0 52.1923,-103.8077 L 81.8077,-74.1923 Q 91.0,-65.0 91.0,-52.0 L 91.0,92.0 Q 91.0,113.0 70.0,113.0 L -70.0,113.0 Q -91.0,113.0 -91.0,92.0 L -91.0,-92.0 Q -91.0,-113.0 -70.0,-113.0 Z" fill="url(#page)" stroke="#ffffff" stroke-width="26.0"
+            stroke-linejoin="round" clip-path="url(#pageclip)"/>
+      <path d="M 52.1923,-103.8077 L 81.8077,-74.1923 Q 91.0,-65.0 78.0,-65.0 L 56.0,-65.0 Q 43.0,-65.0 43.0,-78.0 L 43.0,-100.0 Q 43.0,-113.0 52.1923,-103.8077 Z" fill="#ffffff"/>
+      <path d="M -91.0,-77.0 L 29.439999999999998,-77.0 Q 37.44,-77.0 37.44,-69.0 L 37.44,-39.0 Q 37.44,-31.0 29.439999999999998,-31.0 L -91.0,-31.0 Z" fill="#ffffff"/>
+      <text x="-79.0" y="-42.0" font-family="Helvetica, Arial, sans-serif"
+            font-size="40" font-weight="700" fill="#1f6385"
+            letter-spacing="0.5">PDF</text>
+      <rect x="-62.0" y="13.560000000000016" width="124.0" height="13" rx="6.5" fill="#1f6385" opacity="0.82"/>
+      <rect x="-62.0" y="41.56000000000002" width="76.9" height="13" rx="6.5" fill="#1f6385" opacity="0.82"/>
+    </g>
+</svg>
