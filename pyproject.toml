@@ -66,6 +66,9 @@ dev = [
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
     "ruff>=0.15.15",
+    # Pure-Python Toga core so pyright can type-check gui/app.py without pulling the
+    # GTK/cairo backend (which needs system libs and breaks `uv sync` on Linux CI).
+    "toga-core>=0.5",
 ]
 
 [tool.ruff]
