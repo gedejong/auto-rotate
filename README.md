@@ -1,9 +1,17 @@
-# Auto-Rotate
+<p align="center">
+  <img src="docs/assets/logo.png" alt="Auto-Rotate" width="160" height="160">
+</p>
+
+<h1 align="center">Auto-Rotate</h1>
+
+<p align="center">
 
 [![CI](https://github.com/gedejong/auto-rotate/actions/workflows/ci.yml/badge.svg)](https://github.com/gedejong/auto-rotate/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/auto-rotate.svg)](https://pypi.org/project/auto-rotate/)
 [![Python](https://img.shields.io/pypi/pyversions/auto-rotate.svg)](https://pypi.org/project/auto-rotate/)
 [![License: BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](LICENSE)
+
+</p>
 
 Automatically **deskew and turn upright** every page of a PDF — CLI, Python library, and a
 cross-platform desktop app.
