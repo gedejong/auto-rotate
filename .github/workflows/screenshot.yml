@@ -1,0 +1,86 @@
+name: Screenshot
+
+# Captures a real screenshot of the GUI (preloaded with a generated bad scan, showing the
+# before/after previews) for the Flathub AppStream metadata. Uploads it as an artifact to
+# review and commit.
+on:
+  workflow_dispatch:
+  push:
+    branches: [flathub]
+    paths:
+      - "packaging/flatpak/make_sample_scan.py"
+      - "src/auto_rotate/gui/app.py"
+      - ".github/workflows/screenshot.yml"
+
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install GTK build/runtime deps + capture tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgtk-3-dev gir1.2-gtk-3.0 libgirepository-2.0-dev libgirepository1.0-dev \
+            libcairo2-dev gobject-introspection pkg-config python3-dev \
+            xvfb openbox xdotool imagemagick
+
+      - name: Install the app + GUI backend
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install --upgrade pip
+          # The branch carries the demo hook 0.1.0 lacks; toga-gtk pulls + builds
+          # PyGObject 3.56 (Ubuntu's system 3.48 is too old for toga-gtk 0.5).
+          .venv/bin/pip install .
+          .venv/bin/pip install "toga-gtk>=0.5"
+
+      - name: Generate the sample bad scan
+        run: .venv/bin/python packaging/flatpak/make_sample_scan.py "$PWD/sample_scan.pdf"
+
+      - name: Launch the GUI and capture the window
+        run: |
+          set -euo pipefail
+          export DISPLAY=:99
+          Xvfb :99 -screen 0 1280x1024x24 >/dev/null 2>&1 &
+          sleep 2
+          openbox >/dev/null 2>&1 &
+          sleep 2
+          AUTO_ROTATE_DEMO_PDF="$PWD/sample_scan.pdf" .venv/bin/auto-rotate-gui >/tmp/app.log 2>&1 &
+          APP_PID=$!
+          # Poll up to ~60s for the window (don't block forever if the app crashes).
+          WID=""
+          for _ in $(seq 1 30); do
+            WID=$(xdotool search --name "Auto-Rotate" 2>/dev/null | head -1 || true)
+            [ -n "$WID" ] && break
+            kill -0 "$APP_PID" 2>/dev/null || { echo "App exited before opening a window."; break; }
+            sleep 2
+          done
+          echo "--- app log ---"; cat /tmp/app.log || true
+          if [ -z "$WID" ]; then echo "::error::GUI window never appeared"; exit 1; fi
+          sleep 10  # let the demo finish and render both preview panes
+          # Toga/GTK creates several windows with this title; pick the largest (the main one).
+          WID=""; best_area=0
+          for wid in $(xdotool search --name "Auto-Rotate" 2>/dev/null); do
+            unset WIDTH HEIGHT X Y
+            eval "$(xdotool getwindowgeometry --shell "$wid")"
+            area=$(( ${WIDTH:-0} * ${HEIGHT:-0} ))
+            echo "candidate $wid: ${WIDTH:-?}x${HEIGHT:-?}"
+            if [ "$area" -gt "$best_area" ]; then best_area=$area; WID=$wid; fi
+          done
+          xdotool windowactivate "$WID" 2>/dev/null || true
+          xdotool windowraise "$WID" 2>/dev/null || true
+          sleep 2
+          eval "$(xdotool getwindowgeometry --shell "$WID")"
+          echo "capturing window $WID: ${WIDTH}x${HEIGHT}+${X}+${Y}"
+          import -window root /tmp/full.png
+          convert /tmp/full.png -crop "${WIDTH}x${HEIGHT}+${X}+${Y}" +repage \
+            packaging/flatpak/screenshot.png
+          kill "$APP_PID" 2>/dev/null || true
+          identify packaging/flatpak/screenshot.png
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: screenshot
+          path: packaging/flatpak/screenshot.png

@@ -1,0 +1,13 @@
+auto-rotate==0.1.0
+img2pdf==0.6.3
+jdeskew==0.3.0
+numpy==2.4.6
+opencv-python-headless==4.13.0.92
+packaging==26.2
+pikepdf==10.7.2
+pillow==12.2.0
+pypdfium2==5.8.0
+pytesseract==0.3.13
+toga-core==0.5.4
+toga-gtk==0.5.4
+travertino==0.5.4

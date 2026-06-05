@@ -1,0 +1,62 @@
+name: Flatpak
+
+# Builds the Flatpak in the Flathub builder container (both arches) to validate the
+# manifest before submitting to Flathub, and uploads the generated offline dependency
+# set so it can be committed for the Flathub repo.
+on:
+  push:
+    branches: [flathub]
+    paths:
+      - "packaging/flatpak/**"
+      - ".github/workflows/flatpak.yml"
+  workflow_dispatch:
+
+jobs:
+  flatpak:
+    name: Build (x86_64)
+    # x86_64 only: the flathub-infra container is amd64, so aarch64 can't build here.
+    # The committed python3-deps.json carries both arches' wheels, so Flathub's own
+    # aarch64 buildbot builds that arch at submission time.
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-47
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v4
+
+      # Validate the committed python3-deps.json (what Flathub builds from). Regenerate
+      # it only when it's absent or REGEN_DEPS is set, to refresh after a version bump.
+      - name: Resolve offline Python dependency sources
+        working-directory: packaging/flatpak
+        run: |
+          set -euo pipefail
+          if [ -f python3-deps.json ] && [ -z "${REGEN_DEPS:-}" ]; then
+            echo "Using committed python3-deps.json"
+            exit 0
+          fi
+          python3 -m pip install --quiet requirements-parser aiohttp toml
+          # The repo's `flatpak-pip-generator` is a symlink; fetch the real .py.
+          curl -fL -o fpg.py https://raw.githubusercontent.com/flatpak/flatpak-builder-tools/master/pip/flatpak-pip-generator.py
+          # Binary-wheel packages use platform wheels (both arches); lxml/pygobject/pycairo
+          # ship in the GNOME runtime (read-only), so pip uses the runtime copies.
+          python3 fpg.py \
+            --runtime=org.gnome.Sdk//47 \
+            --requirements-file=requirements.txt \
+            --prefer-wheels=numpy,opencv-python-headless,pillow,pikepdf,pypdfium2 \
+            --ignore-installed=lxml,pygobject,pycairo \
+            --output=python3-deps
+          rm -f fpg.py
+
+      # Upload the generated set (both arches' wheels) for committing to the Flathub repo.
+      - name: Upload generated deps
+        uses: actions/upload-artifact@v4
+        with:
+          name: python3-deps
+          path: packaging/flatpak/python3-deps.json
+
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: auto-rotate-x86_64.flatpak
+          manifest-path: packaging/flatpak/io.github.gedejong.auto_rotate.yaml
+          cache-key: flatpak-builder-x86_64-${{ github.sha }}
+          upload-artifact: false
