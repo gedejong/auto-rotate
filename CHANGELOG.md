@@ -6,17 +6,6 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
-### Added
-
-- GUI: before/after previews of the first queued file's first page.
-
-### Fixed
-
-- GUI/desktop app now finds `tesseract`/`ocrmypdf` even when they are not on `PATH`
-  (common install dirs like `/opt/homebrew/bin` are searched), and invokes them by
-  absolute path with an augmented environment. Previously the packaged app greyed out
-  orientation/OCR despite the binaries being installed.
-
 ## [0.1.0] - 2026-06-05
 
 ### Added
@@ -27,9 +16,17 @@ All notable changes to this project are documented here. The format is based on
   thresholding (keeps thin staff lines / strokes connected on uneven scans).
 - `--ocr`: optional searchable text layer via OCRmyPDF.
 - `auto-rotate` command-line interface and a Python library API (`deskew_pdf`).
-- Cross-platform desktop GUI (`auto-rotate-gui`, Toga) with runtime capability detection.
+- Cross-platform desktop GUI (`auto-rotate-gui`, Toga) with runtime capability detection
+  and before/after previews of the first queued file's first page.
 - Native installers via Briefcase (Windows MSI, macOS DMG, Linux deb/rpm/Flatpak).
 - BSD-3-Clause license and open-source project scaffolding.
+
+### Fixed
+
+- The desktop app finds `tesseract`/`ocrmypdf` even when they are not on `PATH` (common
+  install dirs like `/opt/homebrew/bin` are searched), and invokes them by absolute path
+  with an augmented environment — so orientation/OCR work in the packaged app instead of
+  being greyed out.
 
 [Unreleased]: https://github.com/gedejong/auto-rotate/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/gedejong/auto-rotate/releases/tag/v0.1.0
