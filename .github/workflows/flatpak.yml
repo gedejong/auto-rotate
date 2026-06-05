@@ -27,9 +27,12 @@ jobs:
           python3 -m pip install --quiet requirements-parser aiohttp toml
           # The repo's `flatpak-pip-generator` is a symlink; fetch the real .py.
           curl -fL -o fpg.py https://raw.githubusercontent.com/flatpak/flatpak-builder-tools/master/pip/flatpak-pip-generator.py
+          # Binary-wheel packages must use platform wheels (no usable sdist build);
+          # pygobject/pycairo stay as sdists built against the runtime. Both arches.
           python3 fpg.py \
             --runtime=org.gnome.Sdk//47 \
             --requirements-file=requirements.txt \
+            --prefer-wheels=numpy,opencv-python-headless,pillow,lxml,pikepdf,pypdfium2 \
             --output=python3-deps
           rm -f fpg.py
           echo "=== generated python3-deps.json (first module) ==="
